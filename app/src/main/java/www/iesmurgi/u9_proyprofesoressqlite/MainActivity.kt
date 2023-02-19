@@ -1,20 +1,28 @@
 package www.iesmurgi.u9_proyprofesoressqlite
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import android.widget.Toolbar
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.navigation.NavigationView
 import www.iesmurgi.u9_proyprofesoressqlite.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),NavigationView.OnNavigationItemSelectedListener {
     lateinit var binding: ActivityMainBinding
     lateinit var conexion: BaseDatosProfes
     lateinit var miAdapter: UsuariosAdapter
     var lista = mutableListOf<Usuarios>()
-
+    private lateinit var drawer: DrawerLayout
+    private lateinit var toogle:ActionBarDrawerToggle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -29,36 +37,59 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            R.id.item_crear->{
-                startActivity(Intent(this, AddUpdateActivity::class.java))
-                true
-            }
-            R.id.item_borrar_todo->{ //Si tenemos implementado el adapter y la BD lo codificamos
-                conexion.borrarTodo()
-                lista.clear()
-                miAdapter.notifyDataSetChanged()
-                binding.tvNo.visibility = View.VISIBLE
-                true
-            }
-            R.id.item_salir->{
-                finish()
-                true
-            }
-            else->true
-        }
-    }
+
 
     private fun setListeners() {
-       binding.fabAdd.setOnClickListener {
+        binding.fabAdd.setOnClickListener {
            startActivity(Intent(this, AddUpdateActivity::class.java))
-       }
+        }
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_main)
+        setSupportActionBar(toolbar)
+
+        drawer = findViewById(R.id.drawer_layout)
+
+        toogle = ActionBarDrawerToggle(this,drawer,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close)
+        drawer.addDrawerListener(toogle)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+
+        val navigationView: NavigationView = findViewById(R.id.navigation_view)
+        navigationView.setNavigationItemSelectedListener(this)
     }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+
+        when(item.itemId){
+            R.id.menu_item1 -> Toast.makeText(this,"Item 1 seleccionado",Toast.LENGTH_SHORT).show()
+            R.id.menu_item2 -> Toast.makeText(this,"Item 2 seleccionado",Toast.LENGTH_SHORT).show()
+            R.id.menu_item3 -> Toast.makeText(this,"Item 3 seleccionado",Toast.LENGTH_SHORT).show()
+        }
+
+        drawer.closeDrawer(GravityCompat.START)
+        return true
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (toogle.onOptionsItemSelected(item))
+            return true
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        toogle.syncState()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        toogle.onConfigurationChanged(newConfig)
+    }
+
 
     private fun setRecycler() {
         lista = conexion.leerTodos()
-        println(lista[0].imagen)
         binding.tvNo.visibility = View.INVISIBLE
         if (lista.size == 0) {
             binding.tvNo.visibility = View.VISIBLE
@@ -96,4 +127,6 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         setRecycler()
     }
+
+
 }

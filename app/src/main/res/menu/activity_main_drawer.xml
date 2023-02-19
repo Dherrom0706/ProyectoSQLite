@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/menu_item1"
+            android:title="Item 1"
+            android:icon="@drawable/abc_vector_test"/>
+        <item
+            android:id="@+id/menu_item2"
+            android:title="Item 2"
+            android:icon="@drawable/abc_vector_test"/>
+    </group>
+
+    <item android:title="Titulo">
+
+        <menu>
+
+            <item
+                android:id="@+id/menu_item3"
+                android:title="Item 3"
+                android:icon="@drawable/abc_vector_test"/>
+            <item
+                android:id="@+id/menu_item4"
+                android:title="Item 4"
+                android:icon="@drawable/abc_vector_test"/>
+
+        </menu>
+
+    </item>
+</menu>

@@ -1,13 +1,20 @@
 package www.iesmurgi.u9_proyprofesoressqlite
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.drawToBitmap
 import www.iesmurgi.u9_proyprofesoressqlite.databinding.ActivityAddUpdateBinding
@@ -59,26 +66,63 @@ class AddUpdateActivity : AppCompatActivity() {
         }
     }
 
-    private val PICK_IMAGE_REQUEST_GALERIA = 1;
+    private val PICK_IMAGE_REQUEST_GALERIA = 20
+    private val PICK_IMAGE_REQUEST_CAMERA = 75
+
     private fun abrirFoto() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, PICK_IMAGE_REQUEST_GALERIA)
 
-
+        val options = listOf(
+            CustomOption("Tomar foto", R.drawable.camara),
+            CustomOption("Elegir de la galería", R.drawable.galeria)
+        )
+        val adapter = object : ArrayAdapter<CustomOption>(this, R.layout.custom_icon_esqueleto, options) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.custom_icon_esqueleto, parent, false)
+                val option = getItem(position)
+                val iconView = view.findViewById<ImageView>(R.id.option_icon)
+                val nameView = view.findViewById<TextView>(R.id.option_name)
+                option?.let {
+                    iconView.setImageResource(it.iconRes)
+                    nameView.text = it.name
+                }
+                return view
+            }
+        }
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Elige una opción")
+        builder.setAdapter(adapter) { _, item ->
+            when {
+                options[item].name == "Tomar foto" -> {
+                    val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    startActivityForResult(intent, PICK_IMAGE_REQUEST_CAMERA)
+                }
+                options[item].name == "Elegir de la galería" -> {
+                    val intent = Intent(Intent.ACTION_PICK)
+                    intent.type = "image/*"
+                    startActivityForResult(intent, PICK_IMAGE_REQUEST_GALERIA)
+                }
+            }
+        }
+        builder.show()
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_IMAGE_REQUEST_GALERIA && resultCode == Activity.RESULT_OK && data != null) {
-            val imagenUri = data.data
-            val stream = imagenUri?.let { contentResolver.openInputStream(it) }
-            val datos = stream?.readBytes() ?: return
-            imagen = BitmapFactory.decodeByteArray(datos, 0, datos.size)
-            binding.ivAddUpdate.setImageBitmap(imagen)
-            /************* FALLA YA QUE NO COGE IMAGEN TODAVIA AQUI *******************/
-            println("$imagen iweroewjro")
+        when {
+            requestCode == PICK_IMAGE_REQUEST_GALERIA && resultCode == Activity.RESULT_OK && data != null -> {
+                val imagenUri = data.data
+                val stream = imagenUri?.let { contentResolver.openInputStream(it) }
+                val datos = stream?.readBytes() ?: return
+                imagen = BitmapFactory.decodeByteArray(datos, 0, datos.size)
+                binding.ivAddUpdate.setImageBitmap(imagen)
+            }
+            requestCode == PICK_IMAGE_REQUEST_CAMERA && resultCode == Activity.RESULT_OK && data != null -> {
+                val imagen = data.extras?.get("data") as Bitmap
+                binding.ivAddUpdate.setImageBitmap(imagen)
+            }
         }
     }
+
     private fun crearRegistro() {
         nombre=binding.etNombre.text.toString().trim()
         email=binding.etEmail.text.toString().trim()
