@@ -1,9 +1,17 @@
 package www.iesmurgi.u9_proyprofesoressqlite
 
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.view.drawToBitmap
 import www.iesmurgi.u9_proyprofesoressqlite.databinding.ActivityAddUpdateBinding
+import java.io.ByteArrayOutputStream
 
 class AddUpdateActivity : AppCompatActivity() {
     lateinit var binding: ActivityAddUpdateBinding
@@ -11,6 +19,7 @@ class AddUpdateActivity : AppCompatActivity() {
     var asignatura=""
     var email=""
     var id: Int? = null
+    var imagen: Bitmap? = null
     lateinit var conexion: BaseDatosProfes
     var editar = false
 
@@ -30,10 +39,12 @@ class AddUpdateActivity : AppCompatActivity() {
             editar= true
             binding.btnCrear.text="EDITAR"
             val usuario = datos.getSerializable("USUARIO") as Usuarios
+            imagen = usuario.imagen?.let { BitmapFactory.decodeByteArray(usuario.imagen, 0, it.size) }
             id=usuario.id
             binding.etNombre.setText(usuario.nombre)
             binding.etAsignatura.setText(usuario.asig)//No esta en el esqueleto
             binding.etEmail.setText(usuario.email)
+            binding.ivAddUpdate.setImageBitmap(imagen)
         }
     }
     private fun setListeners() {
@@ -43,12 +54,37 @@ class AddUpdateActivity : AppCompatActivity() {
         binding.btnCrear.setOnClickListener {
             crearRegistro()
         }
+        binding.btnFoto.setOnClickListener {
+            abrirFoto()
+        }
+    }
+
+    private val PICK_IMAGE_REQUEST_GALERIA = 1;
+    private fun abrirFoto() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, PICK_IMAGE_REQUEST_GALERIA)
+
+
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST_GALERIA && resultCode == Activity.RESULT_OK && data != null) {
+            val imagenUri = data.data
+            val stream = imagenUri?.let { contentResolver.openInputStream(it) }
+            val datos = stream?.readBytes() ?: return
+            imagen = BitmapFactory.decodeByteArray(datos, 0, datos.size)
+            binding.ivAddUpdate.setImageBitmap(imagen)
+            /************* FALLA YA QUE NO COGE IMAGEN TODAVIA AQUI *******************/
+            println("$imagen iweroewjro")
+        }
     }
     private fun crearRegistro() {
         nombre=binding.etNombre.text.toString().trim()
         email=binding.etEmail.text.toString().trim()
         //falta la zona de asignatura
         asignatura = binding.etAsignatura.text.toString().trim()
+        imagen = binding.ivAddUpdate.drawToBitmap()
         if(nombre.length<3){
             binding.etNombre.setError("El campo nombre debe tener al menos 3 caracteres")
             return
@@ -64,8 +100,11 @@ class AddUpdateActivity : AppCompatActivity() {
             binding.etEmail.requestFocus()
             return
         }
+        val stream = ByteArrayOutputStream()
+        imagen?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val byteArray = stream.toByteArray()
         if(!editar){
-            val usuario=Usuarios(1, nombre,asignatura,email)
+            val usuario=Usuarios(1, nombre,asignatura,email,byteArray)
             if(conexion.crear(usuario)>-1){
                 finish()
             }
@@ -73,7 +112,7 @@ class AddUpdateActivity : AppCompatActivity() {
                 Toast.makeText(this, "NO se pudo guardar el registro!!!", Toast.LENGTH_SHORT).show()
             }
         }else{
-            val usuario=Usuarios(id, nombre,asignatura, email)
+            val usuario=Usuarios(id, nombre,asignatura, email,byteArray)
             if(conexion.update(usuario)>-1){
                 finish()
             }
@@ -82,4 +121,5 @@ class AddUpdateActivity : AppCompatActivity() {
             }
         }
     }
+
 }

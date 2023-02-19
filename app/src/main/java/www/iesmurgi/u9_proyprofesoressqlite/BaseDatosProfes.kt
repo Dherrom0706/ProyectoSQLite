@@ -5,6 +5,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Bitmap
+import java.io.ByteArrayOutputStream
 
 class BaseDatosProfes(contexto: Context):SQLiteOpenHelper(contexto,DATABASE,null,VERSION){
     companion object{
@@ -17,8 +19,9 @@ class BaseDatosProfes(contexto: Context):SQLiteOpenHelper(contexto,DATABASE,null
         val q = "CREATE TABLE $TABLA(" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "nombre TEXT NOT NULL, " +
-                "asignatura TEXT NOT NULL, "+
-                "email TEXT NOT NULL UNIQUE)"
+                "asignatura TEXT NOT NULL, " +
+                "email TEXT NOT NULL UNIQUE, " +
+                "imagen BLOB)"
 
         bd?.execSQL(q)
            }
@@ -31,13 +34,15 @@ class BaseDatosProfes(contexto: Context):SQLiteOpenHelper(contexto,DATABASE,null
     //CRUD create, read, update, delete
     //Crear un registro
     fun crear(profe: Usuarios) :Long{
-        val conexion=this.writableDatabase
+        val conexion = this.writableDatabase
+        println(profe.imagen)
         val valores = ContentValues().apply {
             put("NOMBRE", profe.nombre)
-            put ("EMAIL", profe.email)
-            put ("ASIGNATURA",profe.asig)
+            put("EMAIL", profe.email)
+            put("ASIGNATURA", profe.asig)
+            put("IMAGEN", profe.imagen)
         }
-        val cod=conexion.insert(TABLA, null, valores)
+        val cod = conexion.insert(TABLA, null, valores)
         conexion.close()
         return cod
     }
@@ -54,7 +59,8 @@ class BaseDatosProfes(contexto: Context):SQLiteOpenHelper(contexto,DATABASE,null
                         cursor.getInt(cursor.getColumnIndex("id")),
                         cursor.getString(cursor.getColumnIndex("nombre")),
                         cursor.getString(cursor.getColumnIndex("asignatura")),
-                        cursor.getString(cursor.getColumnIndex("email"))
+                        cursor.getString(cursor.getColumnIndex("email")),
+                        cursor.getBlob(cursor.getColumnIndex("imagen"))
                     )
                     lista.add(usuario)
                 }while(cursor.moveToNext())
@@ -95,6 +101,7 @@ class BaseDatosProfes(contexto: Context):SQLiteOpenHelper(contexto,DATABASE,null
             put("NOMBRE", usuario.nombre)
             put("ASIGNATURA",usuario.asig)
             put("EMAIL", usuario.email)
+            put("IMAGEN",usuario.imagen)
         }
         val update = conexion.update(TABLA, valores, "id=?", arrayOf(usuario.id.toString()))
         conexion.close()

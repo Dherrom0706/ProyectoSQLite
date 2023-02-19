@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "www.iesmurgi.u9_proyprofesoressqlite"
-        minSdk 27
+        minSdk 23
         targetSdk 32
         versionCode 1
         versionName "1.0"
