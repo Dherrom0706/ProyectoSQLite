@@ -3,29 +3,17 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/menu_item1"
-            android:title="Item 1"
+            android:id="@+id/menu_aniadir"
+            android:title="Añadir"
             android:icon="@drawable/abc_vector_test"/>
         <item
-            android:id="@+id/menu_item2"
-            android:title="Item 2"
+            android:id="@+id/menu_buscar"
+            android:title="Buscar"
+            android:icon="@drawable/abc_vector_test"/>
+        <item
+            android:id="@+id/menu_borrar"
+            android:title="Borrar todos los datos"
             android:icon="@drawable/abc_vector_test"/>
     </group>
 
-    <item android:title="Titulo">
-
-        <menu>
-
-            <item
-                android:id="@+id/menu_item3"
-                android:title="Item 3"
-                android:icon="@drawable/abc_vector_test"/>
-            <item
-                android:id="@+id/menu_item4"
-                android:title="Item 4"
-                android:icon="@drawable/abc_vector_test"/>
-
-        </menu>
-
-    </item>
 </menu>

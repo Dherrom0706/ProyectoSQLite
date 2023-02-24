@@ -7,7 +7,7 @@
         android:id="@+id/item_borrar_todo"
         android:title="Borrar todo" />
     <item
-        android:id="@+id/item_salir"
-        android:title="Salir" />
+        android:id="@+id/item_buscar"
+        android:title="Buscar" />
 
 </menu>
